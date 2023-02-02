@@ -9,63 +9,71 @@ public class EnemyAttack : MonoBehaviour
     public Animator animator;
     public Animator enemyAnimator;
     public Animator deathAnimation; // The death animation to play when the enemy dies
-    private bool tool;
+    private bool playerAttacks;
+    public int playerMaxHealth = 3;
+    private int playerCurrentHealth;
+    private bool enemyDies = false;
 
-    public int maxHealth = 3;
-
-    private int currentHealth;
-    private bool isDead = false;
     private void Start()
     {
-        currentHealth = maxHealth;
+        playerCurrentHealth = playerMaxHealth;
     }
 
-    IEnumerator Wait()
+    IEnumerator EnemyAttacksPlayer()
     {
-
-        yield return new WaitForSeconds(2);
         GlobalVariables.playerAttack = false;
-        Debug.Log("False");
         animator.SetBool("attack", true);
+
+
+        yield return new WaitForSeconds(5f);
         GlobalVariables.playerHealth -= 10;
-        Debug.Log("Hp: " + GlobalVariables.playerHealth);
+        Debug.Log("Hpp: " + GlobalVariables.playerHealth);
+        Debug.Log("Waited for 6 seconds");
         animator.SetBool("Take_Hit", false);
-        tool = false;
+        playerAttacks = false;
+        //break;
+        yield return new WaitForSeconds(5f);
+
         
+            
     }
+
     IEnumerator WaitAndDie()
     {
         yield return new WaitForSeconds(1);
         this.gameObject.SetActive(false);
     }
-    IEnumerator WaitAndAttack()
+
+    IEnumerator EnemyGetsHit()
     {
-        animator.SetBool("Move", false);
-        animator.SetBool("Take_Hit", true);
+            animator.SetBool("Move", false);
+            animator.SetBool("attack", false);
+            animator.SetBool("Take_Hit", true);
+            //yield return new WaitForSeconds(1);
+            TakeDamage(1);
+            yield return new WaitForSeconds(1f);
+            Debug.Log(playerCurrentHealth);
 
-        TakeDamage(1);
-        Debug.Log(currentHealth);
-
-        animator.SetBool("attack", false);
-        yield return new WaitForSeconds(1);
-        tool = false;
-        GlobalVariables.playerAttack = false;
-        GlobalVariables.enemyInDistance = false;
+            playerAttacks = false;
+            GlobalVariables.playerAttack = false;
+            GlobalVariables.enemyInDistance = false;
     }
+
+
     void Update()
     {
-        if (isDead)
+        if (enemyDies)
         {
             return;
         }
 
         if(GlobalVariables.playerAttack == true)
         {
-            tool = true;
+            playerAttacks = true;
         }
         else
         {
-            tool = false;
+            playerAttacks = false;
         }
 
         // Get the distance between the enemy and the player
@@ -74,22 +82,24 @@ public class EnemyAttack : MonoBehaviour
         // Check if the distance is less than the activation distance
         if (distance < activationDistance)
         {
-            GlobalVariables.enemyInDistance = true;
+            GlobalVariables.enemyInDistance = true; //if player is within atttack distance of the enemy
 
-
-            if(tool == true)
+            if(playerAttacks == true)
             {
-                StartCoroutine(WaitAndAttack());
+                StartCoroutine(EnemyGetsHit());
+                playerAttacks = false;
             }
             else
             {
                 //tool = false;
-                //GlobalVariables.enemyInDistance = false;
-                StartCoroutine(Wait());
+                GlobalVariables.enemyInDistance = false;
+                StartCoroutine(EnemyAttacksPlayer());
             }
         }
         else
         {
+
+            GlobalVariables.enemyInDistance = false;
             // Deactivate the "Attack" animation
             animator.SetBool("attack", false);
             animator.SetBool("Take_Hit", false);
@@ -98,11 +108,11 @@ public class EnemyAttack : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        currentHealth -= damage;
+        playerCurrentHealth -= damage;
 
-        if(currentHealth <= 0)
+        if(playerCurrentHealth <= 0)
         {
-            isDead = true;
+            enemyDies = true;
             deathAnimation.SetTrigger("Die");
             StartCoroutine(WaitAndDie());
 
