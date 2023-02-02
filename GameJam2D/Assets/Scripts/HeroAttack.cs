@@ -5,12 +5,24 @@ using UnityEngine;
 public class HeroAttack : MonoBehaviour
 {
 
+
+    IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(1);
+        //this.gameObject.SetActive(false);
+    }
     //this will be attached to the player
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            GlobalVariables.playerAttack = true;
+            // if (GlobalVariables.enemyInDistance == true){
+                GlobalVariables.playerAttack = true;
+                StartCoroutine(Wait());
+            //} 
+            //GlobalVariables.playerAttack = true;
+
+            
            // Debug.Log("Player has Attacked!");
 
         }
@@ -22,6 +34,8 @@ public class HeroAttack : MonoBehaviour
             //Debug.Log("Test on hero");
             if (GlobalVariables.playerAttack == true)
             {
+
+                StartCoroutine(Wait());
                // GlobalVariables.playerAttack = true;
                 //Debug.Log("hit! on ememy");
 
