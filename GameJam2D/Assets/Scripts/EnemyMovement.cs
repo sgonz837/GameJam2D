@@ -29,6 +29,18 @@ public class EnemyMovement : MonoBehaviour
 
             animator.SetBool("Move", true);
 
+            // Check if the player is behind the enemy
+            if (directionToPlayer.x < 0)
+            {
+                // If so, flip the enemy
+                transform.localScale = new Vector3(-1, 1, 1);
+            }
+            else
+            {
+                // If not, restore the original scale
+                transform.localScale = new Vector3(1, 1, 1);
+            }
+
             // Check if the new position collides with the ground layer
             if (!Physics2D.OverlapCircle(newPosition, 0.1f, groundLayer))
             {
